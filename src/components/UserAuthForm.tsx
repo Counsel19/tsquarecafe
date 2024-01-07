@@ -7,19 +7,114 @@ import { Icons } from "./Icons";
 import { Button } from "./ui/Button";
 import { useToast } from "@/hooks/use-toast";
 import { signIn } from "next-auth/react";
+import {
+  credentialType,
+  registerCredentialType,
+} from "@/lib/validators/credentials";
+import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import { FormSubmitHandler } from "@/types/events";
 
-interface UserAuthFormProps {}
-const UserAuthForm: FC<UserAuthFormProps> = ({}) => {
+interface UserAuthFormProps {
+  signupPage?: boolean;
+}
+const UserAuthForm: FC<UserAuthFormProps> = ({ signupPage }) => {
   const { toast } = useToast();
+  const [name, setName] = useState<{
+    firstname: string;
+    lastname: string;
+  }>({
+    firstname: "",
+    lastname: "",
+  });
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoadingEmail, setIsLoadingEmail] = useState<boolean>(false);
   const [isLoadingGoogle, setIsLoadingGoogle] = useState<boolean>(false);
+  const router = useRouter();
 
-  const loginWithEmail = async () => {
+  const registerWithCredentials: FormSubmitHandler = async (e) => {
+    e.preventDefault();
     setIsLoadingEmail(true);
     try {
+      const payload: registerCredentialType = {
+        email,
+        password,
+        firstname: name.firstname,
+        lastname: name.lastname,
+      };
+
+      await axios.post("/api/auth/register", payload);
+
+      setIsLoadingEmail(false);
+
+      toast({
+        title: "User Account Created Successfully",
+        description: "Login to Access you account",
+      });
+
+      router.push("/sign-in");
     } catch (error) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 422) {
+          return toast({
+            title: "Error Signing Up",
+            description: error.response?.data,
+            variant: "destructive",
+          });
+        }
+        if (error.response?.status === 400) {
+          return toast({
+            title: "Error Signing Up",
+            description: error.response?.data,
+            variant: "destructive",
+          });
+        }
+      }
+
+      return toast({
+        title: "Error Signing Up",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingEmail(false);
+    }
+  };
+
+  const loginWithCredentials: FormSubmitHandler = async (e) => {
+    e.preventDefault();
+    setIsLoadingEmail(true);
+    try {
+      const payload: credentialType = { email, password };
+
+      const res = await signIn(`credentials`, {
+        ...payload,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        return toast({
+          title: "Error Signing Up",
+          description: res?.error,
+          variant: "destructive",
+        });
+      }
+
+      router.replace("/dashboard");
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 400 || error.response?.status === 401) {
+          return toast({
+            title: "Error Signing Up",
+            description: error.response?.data,
+            variant: "destructive",
+          });
+        }
+      }
+
       toast({
         title: "Error Login in",
         description: "Something went wrong",
@@ -44,29 +139,73 @@ const UserAuthForm: FC<UserAuthFormProps> = ({}) => {
     }
   };
 
+  const handleSetName = (name: string, value: string) => {
+    setName((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   return (
     <div>
-      <form className="mt-6 flex flex-col space-y-3">
-        <div>
-          <label className="block text-gray-700 text-sm pb-2">
-            Email Address
-          </label>
-          <Input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-            placeholder="Email"
-          />
-        </div>
+      <form
+        onSubmit={!signupPage ? loginWithCredentials : registerWithCredentials}
+        className="mt-6 flex flex-col space-y-3"
+      >
+        {signupPage ? (
+          <div className="flex gap-4 items-center justify-between">
+            <div className="w-full">
+              <label className="block text-gray-700 text-sm pb-2">
+                First Name
+              </label>
+              <Input
+                value={name.firstname}
+                name="firstname"
+                onChange={(e) => handleSetName(e.target.name, e.target.value)}
+                type="text"
+                placeholder="First Name"
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-gray-700 text-sm pb-2">
+                Last Name
+              </label>
+              <Input
+                name="lastname"
+                value={name.lastname}
+                onChange={(e) => handleSetName(e.target.name, e.target.value)}
+                type="text"
+                placeholder="Last Name"
+              />
+            </div>
+          </div>
+        ) : null}
+        <div
+          className={`  ${
+            signupPage ? "flex gap-4 items-center justify-between" : "space-y-3"
+          }`}
+        >
+          <div className="w-full">
+            <label className="block text-gray-700 text-sm pb-2">
+              Email Address
+            </label>
+            <Input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              placeholder="Email"
+            />
+          </div>
 
-        <div className="mt-4">
-          <label className="block text-gray-700 text-sm pb-2">Password</label>
-          <Input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            placeholder="Password"
-          />
+          <div className={`${!signupPage ? "" : "w-full"}`}>
+            <label className="block text-gray-700 text-sm pb-2">Password</label>
+            <Input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              placeholder="Password"
+            />
+          </div>
         </div>
 
         <div className="text-right mt-2">
@@ -79,12 +218,12 @@ const UserAuthForm: FC<UserAuthFormProps> = ({}) => {
         </div>
 
         <Button
-          onClick={loginWithEmail}
           isLoading={isLoadingEmail}
           size="sm"
           className="w-full"
+          type="submit"
         >
-          Sign In
+          {signupPage ? "Sign Up" : "Sign In"}
         </Button>
       </form>
 

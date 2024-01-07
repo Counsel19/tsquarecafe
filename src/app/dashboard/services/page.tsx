@@ -1,4 +1,5 @@
 import ServiceCards from "@/components/ServiceCards";
+import { generalServices } from "@/lib/utils";
 import { FC } from "react";
 
 interface pageProps {}
@@ -9,8 +10,8 @@ const page: FC<pageProps> = ({}) => {
         <h2 className="text-slate-900 text-xl font-semibold ">Our Services </h2>
         <p className="text-slate-500 text-xs">Below are service we offer </p>
       </div>
-      <div className="grid grid-cols-3 gap-2 w-full">
-        <ServiceCards />
+      <div className="grid grid-cols-3 gap-2 w-full px-4">
+        <ServiceCards servicesData={generalServices} />
       </div>
     </div>
   );

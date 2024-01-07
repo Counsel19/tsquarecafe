@@ -16,6 +16,7 @@ const page: FC<pageProps> = ({}) => {
             <AccountInfocard isDisplayedFromWallet />
 
             <Anouncement
+              fromWallet
               title="Current Price Per Unit: N200"
               description="Your Units are what your use to perform transactions on the platform. You can Purchase units by initiating a purchase and then following the subsequent instructions"
             />

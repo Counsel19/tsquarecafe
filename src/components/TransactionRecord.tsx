@@ -1,26 +1,45 @@
 import { FC } from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { CalendarDays, Clock12 } from "lucide-react";
+import { Transaction } from "@prisma/client";
 
-interface TransactionRecordProps {}
-const TransactionRecord: FC<TransactionRecordProps> = ({}) => {
-  const date = new Date();
+interface TransactionRecordProps extends Transaction {}
+
+const TransactionRecord: FC<TransactionRecordProps> = ({
+  id,
+  createdAt,
+  price,
+  slipId,
+  status,
+  type,
+  reference,
+}) => {
+  console.log(createdAt, "createdAt");
+  const parsedDate = parseISO(`${createdAt}`);
 
   return (
     <div className="flex justify-between p-2 rounded-lg items-center text-sm bg-slate-100">
-      <h5 className="">NIN Verification</h5>
-      <span>ID</span>
+      <h5 className="">{type}</h5>
+      <span>{reference || id}</span>
       <div className="flex gap-2 items-center text-xs">
         <CalendarDays className="h-4 w-4" />
-        {format(date, "eo LLL")}
+        {format(parsedDate, "eo LLL")}
       </div>
       <div className="flex gap-2 items-center text-xs">
         <Clock12 className="h-4 w-4" />
-        {format(date, "eo LLL")}
+        {format(parsedDate, "HH : mm : ss")}
       </div>
 
-      <div className="p-2 text-xs font-semibold rounded-xl bg-teal-600 text-white flex items-center justify-center">
-        Completed
+      <div
+        className={`p-2 text-xs  rounded-xl ${
+          status === "SUCCESS"
+            ? "bg-teal-600"
+            : status === "PENDING"
+            ? "bg-yellow-600"
+            : "bg-rose-600"
+        }  text-white flex items-center justify-center`}
+      >
+        {status.toLowerCase()}
       </div>
     </div>
   );

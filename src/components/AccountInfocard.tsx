@@ -1,7 +1,11 @@
+"use client";
+
 import { FC } from "react";
 import { Button, buttonVariants } from "./ui/Button";
 import { Banknote, ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/redux/store";
 
 interface AccountInfocardProps {
   isDisplayedFromWallet?: boolean;
@@ -9,6 +13,8 @@ interface AccountInfocardProps {
 const AccountInfocard: FC<AccountInfocardProps> = ({
   isDisplayedFromWallet,
 }) => {
+  const { user } = useSelector((store: RootState) => store.user);
+
   return (
     <div className="py-6 px-8 space-y-4 bg-white rounded-lg w-full h-full">
       <div className="space-y-6">
@@ -30,7 +36,9 @@ const AccountInfocard: FC<AccountInfocardProps> = ({
 
         <div className="flex justify-between">
           <div>
-            <h4 className="text-4xl font-bold">40000</h4>
+            <h4 className="text-4xl font-bold">
+              {user ? user?.accountBalance : ""}
+            </h4>
             <p className="text-zinc-500 text-xs">Your Current Balance</p>
           </div>
 

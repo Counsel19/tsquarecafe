@@ -5,6 +5,7 @@ import RecentTransactions from "@/components/RecentTransactions";
 import ReportCard from "@/components/ReportCard";
 import ServiceCards from "@/components/ServiceCards";
 import UserProfileCard from "@/components/UserProfileCard";
+import { generalServices } from "@/lib/utils";
 import { FC } from "react";
 
 interface pageProps {}
@@ -21,7 +22,7 @@ const page: FC<pageProps> = ({}) => {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2 w-full">
-          <ServiceCards />
+          <ServiceCards servicesData={generalServices} />
         </div>
         <div className="grid grid-cols-3 gap-2 w-full">
           <RecentTransactions />

@@ -39,12 +39,65 @@ model Session {
   userId String @db.ObjectId
 }
 
+enum UserType {
+  AGENT
+  ADMIN
+}
+
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String?       @unique
+  password       String?
+  emailVerified  DateTime?
+  image          String?
+  type           UserType      @default(AGENT)
+  accountBalance Float         @default(0)
+  agentBonus     Float         @default(0)
+  accounts       Account[]
+  sessions       Session[]
+  transactions   Transaction[]
+  Payments       Payments[]
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Transaction {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  type      String
+  slipType  SlipType?         @relation(fields: [slipId], references: [id], onDelete: Cascade)
+  slipId    String?           @db.ObjectId
+  status    TransactionStatus @default(PENDING)
+  price     Float
+  reference String?
+  createdBy User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String            @db.ObjectId
+  createdAt DateTime          @default(now())
+}
+
+model SlipType {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  price        Float
+  image        String
+  transactions Transaction[]
+}
+
+enum PaymentStatus {
+  INITIATED
+  PAID
+  CREDITED
+}
+
+model Payments {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  amount    Float
+  status    PaymentStatus @default(INITIATED)
+  createdBy User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String        @db.ObjectId
+  createdAt DateTime      @default(now())
 }

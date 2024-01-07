@@ -32,7 +32,7 @@ const SignIn: FC<SignInProps> = ({}) => {
             <p className="mt-4 text-sm">
               Need an account?{" "}
               <Link
-                href="/"
+                href="/sign-up"
                 className="text-gray-500 hover:text-gray-700 font-semibold"
               >
                 Create an account

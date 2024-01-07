@@ -12,53 +12,61 @@ import {
 import UserAvatar from "./UserAvatar";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface UserAccountNavProps {
-  user: Pick<User, "name" | "image" | "email">;
+  user: Pick<User, "name" | "image" | "email"> | null;
 }
 const UserAccountNav: FC<UserAccountNavProps> = ({ user }) => {
+  const router = useRouter();
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <UserAvatar
-          className="h-8 w-8"
-          user={{ name: user.name || null, image: user.image || null }}
-        ></UserAvatar>
-      </DropdownMenuTrigger>
+    <>
+      {user && (
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <UserAvatar
+              className="h-8 w-8"
+              user={{ name: user.name || null, image: user.image || null }}
+            ></UserAvatar>
+          </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="bg-white" align="end">
-        <div className="flex items-center justify-start gap-2 p-2">
-          <div className="flex flex-col space-y-1 leading-none">
-            {user.name && <p className="font-medium">{user.name}</p>}
-            {user.email && (
-              <p className="w-[200px] truncate text-sm text--zinc-700">
-                {user.email}
-              </p>
-            )}
-          </div>
-        </div>
+          <DropdownMenuContent className="bg-white" align="end">
+            <div className="flex items-center justify-start gap-2 p-2">
+              <div className="flex flex-col space-y-1 leading-none">
+                {user.name && <p className="font-medium">{user.name}</p>}
+                {user.email && (
+                  <p className="w-[200px] truncate text-sm text--zinc-700">
+                    {user.email}
+                  </p>
+                )}
+              </div>
+            </div>
 
-        <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild>
-          <Link href="/settings">Settings</Link>
-        </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/settings">Settings</Link>
+            </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          onSelect={(event) => {
-            event.preventDefault();
-            signOut({
-              callbackUrl: `${window.location.origin}/sign`,
-            });
-          }}
-          className="cursor-pointer"
-        >
-          Sign Out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <DropdownMenuItem
+              onSelect={(event) => {
+                event.preventDefault();
+                signOut({
+                  callbackUrl: `${window.location.origin}/sign`,
+                });
+
+                router.push("/sign-in");
+              }}
+              className="cursor-pointer"
+            >
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </>
   );
 };
 

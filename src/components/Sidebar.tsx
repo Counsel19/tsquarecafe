@@ -1,3 +1,5 @@
+"use client";
+
 import { FC } from "react";
 import SidebarLink from "./SidebarLink";
 import {
@@ -12,9 +14,20 @@ import {
 } from "lucide-react";
 import Brand from "./Brand";
 import { Button, buttonVariants } from "./ui/Button";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface SidebarProps {}
 const Sidebar: FC<SidebarProps> = ({}) => {
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    signOut({
+      callbackUrl: `${window.location.origin}/sign`,
+    });
+
+    router.replace("/sign-in");
+  };
   return (
     <div className="w-full text-sm h-full space-y-2 text-white rounded-lg grid grid-rows-[auto_1fr]">
       <div className=" bg-slate-900 text-zinc-50 rounded-lg p-4">
@@ -68,6 +81,7 @@ const Sidebar: FC<SidebarProps> = ({}) => {
               className={buttonVariants({
                 variant: "outline",
               })}
+              onClick={handleSignOut}
             >
               <LogOutIcon className="mr-2" />
               Logout
